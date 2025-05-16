@@ -1,34 +1,120 @@
----
-layout: default
----
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>{{ site.title }}</title>
+  <link rel="stylesheet" href="{{ '/assets/main.css' | relative_url }}">
+  <style>
+    body {
+      display: flex;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: #ddd;
+    }
+    aside.sidebar {
+      width: 280px;
+      padding: 20px;
+      background-color: #1e1e1e;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+    aside.sidebar img.logo {
+      width: 100%;
+      max-width: 160px;
+      border-radius: 10px;
+    }
+    aside.sidebar h1, aside.sidebar p {
+      margin: 0;
+    }
+    aside.sidebar .categories, aside.sidebar .description {
+      margin-top: 20px;
+    }
+    main.content {
+      flex-grow: 1;
+      padding: 30px;
+      max-width: 900px;
+      overflow-y: auto;
+    }
+    article.post {
+      background: #222;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+    article.post h2 {
+      margin-top: 0;
+    }
+    article.post .post-meta {
+      font-size: 0.9em;
+      color: #999;
+      margin-bottom: 10px;
+    }
+    article.post .post-tags span {
+      background-color: #555;
+      padding: 3px 8px;
+      border-radius: 5px;
+      margin-right: 5px;
+      font-size: 0.85em;
+      color: #ccc;
+    }
+  </style>
+</head>
+<script>
+  const toggle = document.createElement('button');
+  toggle.textContent = 'Toggle Dark/Light';
+  toggle.style.position = 'fixed';
+  toggle.style.top = '10px';
+  toggle.style.right = '10px';
+  toggle.style.zIndex = '9999';
+  document.body.appendChild(toggle);
 
-<div class="home">
-  {%- if page.title -%}
-    <h1 class="page-heading">{{ page.title }}</h1>
-  {%- endif -%}
+  toggle.addEventListener('click', () => {
+    document.body.classList.toggle('light');
+  });
+</script>
 
-  {{ content }}
+<body>
+  <aside class="sidebar">
+    <img src="{{ site.logo | relative_url }}" alt="Logo" class="logo" />
+    <h1>{{ site.title }}</h1>
+    <p>{{ site.description }}</p>
 
-  {%- if site.posts.size > 0 -%}
-    <h2 class="post-list-heading">{{ page.list_title | default: "Posts" }}</h2>
-    <ul class="post-list">
-      {%- for post in site.posts -%}
-      <li>
-        {%- assign date_format = site.minima.date_format | default: "%b %-d, %Y" -%}
-        <span class="post-meta">{{ post.date | date: date_format }}</span>
-        <h3>
-          <a class="post-link" href="{{ post.url | relative_url }}">
-            {{ post.title | escape }}
-          </a>
-        </h3>
-        {%- if site.show_excerpts -%}
-          {{ post.excerpt }}
-        {%- endif -%}
-      </li>
-      {%- endfor -%}
-    </ul>
+    <div class="categories">
+      <h3>Categories</h3>
+      <ul>
+        {% assign categories_list = site.categories | sort %}
+        {% for category in categories_list %}
+          <li>{{ category[0] }} ({{ category[1].size }})</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </aside>
 
-    <p class="rss-subscribe">subscribe <a href="{{ "/feed.xml" | relative_url }}">via RSS</a></p>
-  {%- endif -%}
-
-</div>
+  <main class="content">
+    <h1>All Posts</h1>
+    {% for post in site.posts %}
+    <article class="post">
+      <h2><a href="{{ post.url | relative_url }}">{{ post.title }}</a></h2>
+      <div class="post-meta">
+        <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%b %-d, %Y" }}</time> |
+        {% if post.categories %}
+          {{ post.categories | join: ", " }}
+        {% endif %}
+      </div>
+      <p>{{ post.excerpt | strip_html | truncate: 200 }}</p>
+      <div class="post-tags">
+        {% if post.tags %}
+          {% for tag in post.tags %}
+            <span>{{ tag }}</span>
+          {% endfor %}
+        {% endif %}
+      </div>
+    </article>
+    {% endfor %}
+  </main>
+</body>
+</html>
