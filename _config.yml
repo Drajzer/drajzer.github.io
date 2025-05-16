@@ -1,15 +1,17 @@
 title: EkrUp Blog
-description: 
+logo: /assets/images/logo.png
+description: "EkrUp blog - pentesting, malware analysis, digital forensics, web security, and CTF writeups."
 baseurl: "" 
 url: "https://drajzer.github.io" 
 github_username: drajzer
 
 
 theme: minima
+minima:
+  skin: auto
+
 plugins:
   - jekyll-feed
   - jekyll-seo-tag
   - jekyll-sitemap
-
-
 categories: [pentesting, malware-analysis, digital-forensic, web-security, ctf-writeups]
