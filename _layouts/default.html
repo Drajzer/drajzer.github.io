@@ -1,47 +1,63 @@
 <!DOCTYPE html>
-<html lang="{{ page.lang | default: site.lang | default: "en" }}">
-
+<html lang="{{ page.lang | default: site.lang | default: 'en' }}">
   {%- include head.html -%}
-<script>
-  const selector = document.getElementById('theme-selector');
-
-  function applyTheme(theme) {
-    if (theme === 'auto') {
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      document.documentElement.removeAttribute('data-theme');
-      if (prefersDark) {
-        document.documentElement.setAttribute('data-theme', 'dark');
-      }
-    } else {
-      document.documentElement.setAttribute('data-theme', theme);
-    }
-  }
-
-  document.addEventListener('DOMContentLoaded', () => {
-    const saved = localStorage.getItem('jekyll-theme') || 'auto';
-    applyTheme(saved);
-    if (selector) selector.value = saved;
-  });
-
-  selector?.addEventListener('change', (e) => {
-    const val = e.target.value;
-    localStorage.setItem('jekyll-theme', val);
-    applyTheme(val);
-  });
-</script>
 
   <body>
+    <div class="sidebar" role="complementary" aria-label="Sidebar">
+      <div class="logo">
+        <img src="{{ '/assets/logo.png' | relative_url }}" alt="{{ site.title }} Logo" />
+        <div class="title">{{ site.title }}</div>
+      </div>
+      <div class="description">
+        pentesting, malware analysis, digital forensics, web security, and CTF writeups.
+      </div>
+      <div>
+        <h3>Categories</h3>
+        <ul class="categories">
+          {% for category in site.categories %}
+            <li><a href="{{ '/categories/' | append: category[0] | relative_url }}">{{ category[0] }}</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="footer">
+        &copy; {{ "now" | date: "%Y" }} {{ site.title }}
+      </div>
+    </div>
 
     {%- include header.html -%}
 
     <main class="page-content" aria-label="Content">
-      <div class="wrapper">
-        {{ content }}
-      </div>
+      {{ content }}
     </main>
 
     {%- include footer.html -%}
 
-  </body>
+    <script>
+      function applyTheme(theme) {
+        if (theme === 'auto') {
+          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          document.documentElement.removeAttribute('data-theme');
+          if (prefersDark) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+          }
+        } else {
+          document.documentElement.setAttribute('data-theme', theme);
+        }
+      }
 
+      document.addEventListener('DOMContentLoaded', () => {
+        const selector = document.getElementById('theme-selector');
+        const saved = localStorage.getItem('jekyll-theme') || 'auto';
+        applyTheme(saved);
+        if (selector) {
+          selector.value = saved;
+          selector.addEventListener('change', (e) => {
+            const val = e.target.value;
+            localStorage.setItem('jekyll-theme', val);
+            applyTheme(val);
+          });
+        }
+      });
+    </script>
+  </body>
 </html>
