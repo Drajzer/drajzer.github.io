@@ -14,8 +14,9 @@ layout: default
     <div class="categories-section">
       <h3>Categories</h3>
       <ul class="categories-list">
+        <li><a href="{{ site.baseurl }}/" class="category-link active" data-category="all">All</a></li>
         {% for category in site.categories %}
-          <li><a href="{{ site.baseurl }}/categories/{{ category[0] | slugify }}">{{ category[0] }}</a></li>
+          <li><a href="{{ site.baseurl }}/categories/{{ category[0] | slugify }}" class="category-link" data-category="{{ category[0] | slugify }}">{{ category[0] }}</a></li>
         {% endfor %}
       </ul>
     </div>
@@ -25,29 +26,141 @@ layout: default
   <div class="main-content">
     <h1 class="page-heading">Latest Posts</h1>
     
-    <ul class="post-list">
-      {% for post in site.posts %}
-      <li class="post-item">
-        <h2>
-          <a class="post-link" href="{{ post.url | relative_url }}">{{ post.title | escape }}</a>
-        </h2>
-        <div class="post-meta">
-          <span class="post-date">{{ post.date | date: "%b %-d, %Y" }}</span>
-          {% if post.categories.size > 0 %}
-          <span class="post-categories">
-            Categories: 
-            {% for category in post.categories %}
-            <a href="{{ site.baseurl }}/categories/{{ category | slugify }}">{{ category }}</a>{% unless forloop.last %}, {% endunless %}
-            {% endfor %}
-          </span>
-          {% endif %}
-        </div>
-        <div class="post-excerpt">
-          {{ post.excerpt }}
-        </div>
-        <a href="{{ post.url | relative_url }}" class="read-more">Read more →</a>
-      </li>
-      {% endfor %}
-    </ul>
+    <div id="posts-container">
+      <ul class="post-list">
+        {% for post in site.posts %}
+        <li class="post-item" data-categories="{% for category in post.categories %}{{ category | slugify }} {% endfor %}">
+          <h2>
+            <a class="post-link" href="{{ post.url | relative_url }}">{{ post.title | escape }}</a>
+          </h2>
+          <div class="post-meta">
+            <span class="post-date">{{ post.date | date: "%b %-d, %Y" }}</span>
+            {% if post.categories.size > 0 %}
+            <span class="post-categories">
+              Categories: 
+              {% for category in post.categories %}
+              <a href="{{ site.baseurl }}/categories/{{ category | slugify }}" class="category-badge">{{ category }}</a>{% unless forloop.last %} {% endunless %}
+              {% endfor %}
+            </span>
+            {% endif %}
+          </div>
+          <div class="post-excerpt">
+            {{ post.excerpt }}
+          </div>
+          <a href="{{ post.url | relative_url }}" class="read-more">Read more →</a>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    
+    <!-- Pagination Controls -->
+    <div class="pagination">
+      <button id="load-more" class="load-more-btn">Load More Posts</button>
+      <div class="page-numbers">
+        <span class="current-page">Page <span id="current-page-num">1</span></span>
+        <span class="total-pages">of <span id="total-pages">{{ site.posts.size | divided_by: site.paginate | plus: 1 }}</span></span>
+      </div>
+    </div>
   </div>
 </div>
+<script src="{{ '/assets/css/smooth-scroll.js' | relative_url }}"></script>
+<script>
+  // Category filtering functionality
+  document.addEventListener('DOMContentLoaded', function() {
+    const categoryLinks = document.querySelectorAll('.category-link');
+    const postItems = document.querySelectorAll('.post-item');
+    const postsContainer = document.getElementById('posts-container');
+    
+    // Page variables for infinite scroll/pagination
+    const postsPerPage = 5;
+    let currentPage = 1;
+    const totalPosts = {{ site.posts.size }};
+    const totalPages = Math.ceil(totalPosts / postsPerPage);
+    
+    document.getElementById('total-pages').textContent = totalPages;
+    
+    // Initialize - show only first page of posts
+    showPage(1);
+    
+    // Load more button functionality
+    document.getElementById('load-more').addEventListener('click', function() {
+      if (currentPage < totalPages) {
+        currentPage++;
+        showPage(currentPage);
+        document.getElementById('current-page-num').textContent = currentPage;
+        
+        // Hide load more button if we're on the last page
+        if (currentPage >= totalPages) {
+          this.style.display = 'none';
+        }
+      }
+    });
+    
+    // Category filtering
+    categoryLinks.forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        // Update active state
+        categoryLinks.forEach(l => l.classList.remove('active'));
+        this.classList.add('active');
+        
+        const category = this.getAttribute('data-category');
+        
+        // Reset pagination when changing categories
+        currentPage = 1;
+        document.getElementById('current-page-num').textContent = currentPage;
+        document.getElementById('load-more').style.display = 'block';
+        
+        // Filter posts
+        filterPosts(category);
+      });
+    });
+    
+    function showPage(pageNum) {
+      const startIndex = (pageNum - 1) * postsPerPage;
+      const endIndex = Math.min(startIndex + postsPerPage, postItems.length);
+      
+      postItems.forEach((post, index) => {
+        // Check if the post should be visible based on current filter
+        const shouldBeVisible = post.style.display !== 'none';
+        
+        if (shouldBeVisible && index >= startIndex && index < endIndex) {
+          post.classList.add('visible');
+          post.style.opacity = '1';
+          post.style.transform = 'translateY(0)';
+        } else if (shouldBeVisible && index < startIndex) {
+          post.classList.add('visible');
+          post.style.opacity = '1';
+          post.style.transform = 'translateY(0)';
+        } else {
+          post.classList.remove('visible');
+          post.style.opacity = '0';
+          post.style.transform = 'translateY(20px)';
+        }
+      });
+    }
+    
+    function filterPosts(category) {
+      let visibleCount = 0;
+      
+      postItems.forEach(post => {
+        const postCategories = post.getAttribute('data-categories');
+        
+        if (category === 'all' || postCategories.includes(category)) {
+          post.style.display = '';
+          visibleCount++;
+        } else {
+          post.style.display = 'none';
+        }
+      });
+      
+      // Recalculate pagination for filtered posts
+      const newTotalPages = Math.ceil(visibleCount / postsPerPage);
+      document.getElementById('total-pages').textContent = newTotalPages || 1;
+      
+      // Show the first page of filtered results
+      showPage(1);
+    }
+  });
+</script>

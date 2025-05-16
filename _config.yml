@@ -1,4 +1,4 @@
-title: EkrUp Blog
+title: EkrUp Security Blog
 nickname: EkrUp
 email: ekrup@protonmail.com
 description: >-
@@ -18,6 +18,11 @@ theme: minima
 plugins:
   - jekyll-feed
   - jekyll-seo-tag
+  - jekyll-paginate
+
+# Pagination settings
+paginate: 5
+paginate_path: "/page:num/"
 
 # Default layout
 defaults:
