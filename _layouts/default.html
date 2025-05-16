@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="{{ page.lang | default: site.lang | default: "en" }}">
+
+  {%- include head.html -%}
+<script>
+  const selector = document.getElementById('theme-selector');
+
+  function applyTheme(theme) {
+    if (theme === 'auto') {
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.removeAttribute('data-theme');
+      if (prefersDark) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    } else {
+      document.documentElement.setAttribute('data-theme', theme);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const saved = localStorage.getItem('jekyll-theme') || 'auto';
+    applyTheme(saved);
+    if (selector) selector.value = saved;
+  });
+
+  selector?.addEventListener('change', (e) => {
+    const val = e.target.value;
+    localStorage.setItem('jekyll-theme', val);
+    applyTheme(val);
+  });
+</script>
+
+  <body>
+
+    {%- include header.html -%}
+
+    <main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        {{ content }}
+      </div>
+    </main>
+
+    {%- include footer.html -%}
+
+  </body>
+
+</html>
