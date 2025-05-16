@@ -1,133 +1,53 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    {% include head.html %}
-    <link rel="stylesheet" href="{{ '/assets/css/theme-switcher.css' | relative_url }}">
-    <title>{{ page.title }} - {{ site.title }}</title>
-    <style>
-      body {
-        display: flex;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-          Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-        margin: 0;
-        min-height: 100vh;
-      }
-      aside {
-        width: 280px;
-        background: #f5f5f5;
-        padding: 1.5rem;
-        box-sizing: border-box;
-        border-right: 1px solid #ddd;
-      }
-      aside img.logo {
-        max-width: 100%;
-        margin-bottom: 1rem;
-      }
-      aside h2 {
-        margin-top: 1rem;
-      }
-      aside ul.categories {
-        list-style: none;
-        padding-left: 0;
-      }
-      aside ul.categories li {
-        margin-bottom: 0.5rem;
-      }
-      main {
-        flex: 1;
-        padding: 2rem;
-        box-sizing: border-box;
-      }
-      article.post {
-        margin-bottom: 2rem;
-        border-bottom: 1px solid #ddd;
-        padding-bottom: 1rem;
-      }
-      article.post h3 {
-        margin: 0 0 0.3rem;
-      }
-      article.post .excerpt {
-        color: #555;
-      }
-      article.post .tags {
-        margin-top: 0.5rem;
-        font-size: 0.9rem;
-        color: #999;
-      }
-      article.post .tags span {
-        background: #e0e0e0;
-        padding: 2px 6px;
-        margin-right: 5px;
-        border-radius: 3px;
-      }
-    </style>
-  </head>
-  <body>
-    <aside>
-      {% if site.logo %}
-        <img src="{{ site.logo | relative_url }}" alt="Logo" class="logo" />
-      {% endif %}
+---
+layout: default
+---
 
-      <p>{{ site.description }}</p>
-
-      <h2>Categories</h2>
-      <ul class="categories">
-        {% assign cats = site.categories | sort %}
-        {% for cat in cats %}
-          <li>{{ cat[0] | capitalize }} ({{ cat[1].size }})</li>
+<div class="home-container">
+  <div class="sidebar">
+    <div class="logo-container">
+      <img src="{{ '/assets/logo.webp' | relative_url }}" alt="{{ site.title }}" class="site-logo">
+      <h2 class="site-nickname">{{ site.nickname }}</h2>
+    </div>
+    <div class="site-description">{{ site.description }}</div>
+    
+    {% if site.categories.size > 0 %}
+    <div class="categories-section">
+      <h3>Categories</h3>
+      <ul class="categories-list">
+        {% for category in site.categories %}
+          <li><a href="{{ site.baseurl }}/categories/{{ category[0] | slugify }}">{{ category[0] }}</a></li>
         {% endfor %}
       </ul>
-    </aside>
+    </div>
+    {% endif %}
+  </div>
 
-    <main>
-      <h1>{{ page.title }}</h1>
-
+  <div class="main-content">
+    <h1 class="page-heading">Latest Posts</h1>
+    
+    <ul class="post-list">
       {% for post in site.posts %}
-        <article class="post">
-          <h3><a href="{{ post.url | relative_url }}">{{ post.title }}</a></h3>
-          {% if post.description %}
-            <p class="excerpt">{{ post.description }}</p>
-          {% else %}
-            <p class="excerpt">{{ post.excerpt | strip_html | truncate: 150 }}</p>
+      <li class="post-item">
+        <h2>
+          <a class="post-link" href="{{ post.url | relative_url }}">{{ post.title | escape }}</a>
+        </h2>
+        <div class="post-meta">
+          <span class="post-date">{{ post.date | date: "%b %-d, %Y" }}</span>
+          {% if post.categories.size > 0 %}
+          <span class="post-categories">
+            Categories: 
+            {% for category in post.categories %}
+            <a href="{{ site.baseurl }}/categories/{{ category | slugify }}">{{ category }}</a>{% unless forloop.last %}, {% endunless %}
+            {% endfor %}
+          </span>
           {% endif %}
-          {% if post.categories %}
-            <div class="tags">
-              {% for cat in post.categories %}
-                <span>{{ cat }}</span>
-              {% endfor %}
-            </div>
-          {% endif %}
-        </article>
+        </div>
+        <div class="post-excerpt">
+          {{ post.excerpt }}
+        </div>
+        <a href="{{ post.url | relative_url }}" class="read-more">Read more →</a>
+      </li>
       {% endfor %}
-    </main>
-
-    {% include footer.html %}
-    <script>
-      const selector = document.getElementById('theme-selector');
-
-      function applyTheme(theme) {
-        if (theme === 'auto') {
-          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-          document.documentElement.removeAttribute('data-theme');
-          if (prefersDark) {
-            document.documentElement.setAttribute('data-theme', 'dark');
-          }
-        } else {
-          document.documentElement.setAttribute('data-theme', theme);
-        }
-      }
-
-      document.addEventListener('DOMContentLoaded', () => {
-        const saved = localStorage.getItem('jekyll-theme') || 'auto';
-        applyTheme(saved);
-        if (selector) selector.value = saved;
-      });
-
-      selector?.addEventListener('change', (e) => {
-        const val = e.target.value;
-        localStorage.setItem('jekyll-theme', val);
-        applyTheme(val);
-      });
-    </script>
-  </body>
-</html>
+    </ul>
+  </div>
+</div>

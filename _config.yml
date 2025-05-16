@@ -1,17 +1,40 @@
 title: EkrUp Blog
-logo: /assets/images/logo.webp
-description: "EkrUp blog - pentesting, malware analysis, digital forensics, web security, and CTF writeups."
-baseurl: "" 
-url: "https://drajzer.github.io" 
-github_username: drajzer
+nickname: EkrUp
+email: ekrup@protonmail.com
+description: >-
+  A cybersecurity blog focused on the latest threats, vulnerabilities, 
+  and defensive techniques to keep your digital life secure.
+baseurl: "" # the subpath of your site, e.g. /blog
+url: "" # the base hostname & protocol for your site, e.g. http://example.com
 
+# Social media usernames for the footer links
+twitter_username: ekrup_
+github_username:  drajzer
+linkedin_username: ----
 
+# Build settings
+markdown: kramdown
 theme: minima
-minima:
-  skin: auto
-
 plugins:
   - jekyll-feed
   - jekyll-seo-tag
-  - jekyll-sitemap
-categories: [pentesting, malware-analysis, digital-forensic, web-security, ctf-writeups]
+
+# Default layout
+defaults:
+  - scope:
+      path: ""
+      type: "posts"
+    values:
+      layout: "post"
+  - scope:
+      path: ""
+    values:
+      layout: "default"
+
+# Home page layout
+page_excerpts: true
+show_excerpts: true
+permalink: /:categories/:year/:month/:day/:title/
+
+# Use our custom home layout
+layout: home-custom
